@@ -24,158 +24,9 @@ public class Main {
         //create files
         createFiles(pwArray, scanArray, NUMBER_OF_FILES, OUTPUT_FILE_NAME, OUTPUT_EXT);
 
+        processFilesForValidation(scanArray);
 
 
-
-
-        int counter = 0;
-        for (int t = 0; t < scanArray.length; t++) {
-            String error = "";
-            String author = "";
-            String journal = "";
-            String year = "";
-            String title = "";
-            String volume = "";
-            String[] records = new String[0];
-            counter = 0;
-            try {
-                //Scanner scan = new Scanner(new FileInputStream("Latex3.bib"));
-                String fileToString = fileToString(scanArray[t]);
-                String[] fileToStringArray = fileToString.trim().split("@ARTICLE");
-                System.out.println(fileToStringArray.length);
-                records = new String[fileToStringArray.length];
-                for (String f : fileToStringArray) {
-                    String[] singleArticle = f.split(",");
-                    for (int i = 0; i < singleArticle.length; i++) {
-                        String[] info = singleArticle[i].split("=");
-                        if (info.length >= 2) {
-                            String filed = info[0].trim();
-                            if (info[1].trim().substring(1, info[1].length() - 1).isEmpty()) {
-                                error = info[0].trim();
-                                throw new FileInvalidException();
-                            }
-                            switch (filed) {
-                                case "author":
-                                    author = info[1].substring(1, info[1].length() - 1).trim();
-                                    break;
-                                case "journal":
-                                    journal = info[1].substring(1, info[1].length() - 1).trim();
-                                    break;
-                                case "volume":
-                                    volume = "vol." + info[1].substring(1, info[1].length() - 1).trim();
-                                    break;
-                                case "year":
-                                    year = info[1].substring(1, info[1].length() - 1).trim();
-                                    break;
-
-
-                            }
-
-                        }
-                    }
-
-                    //System.out.println(author);
-                    records[counter] = author + " " + journal + " " + volume + " " + year;
-                    counter++;
-
-                }
-
-                for (String r : records) {
-                    System.out.println(r);
-                }
-                System.out.println("ended file " + (t + 1));
-                System.out.println();
-
-
-//            for (String s : filetoStringArray) {
-//                test = s.split(",");
-//                System.out.println(s);
-//                counter++;
-//            }
-//            String[] test1 = filetoStringArray[1].split(",");
-//            String[] testing = {"{X. Li and M. A. Salehi and M. Bayoumi and N. F. Tzeng and R. Buyya}",
-//                    "{IEEE Transactions on Parallel and Distributed Systems}",
-//                    "{Cost-Efficient and Robust On-Demand Video Transcoding Using Heterogeneous Cloud Services}",
-//                    "{2018}",
-//                    "{}",
-//                    "{3}",
-//                    "{556-571}",
-//                    "{Cloud computing;Delays;Quality of service;Robustness;Spatial resolution;Streaming media;Transcoding;Cloud services;On-demand video transcoding;QoS-aware scheduling;heterogeneous VM provisioning}",
-//                    "{10.1109/TPDS.2017.2766069}",
-//                    "{1045-9219}",
-//                    "{March}"};
-//
-//            for (String t : testing) {
-//                System.out.println(t);
-//                if (t.substring(1, t.length() - 1).isEmpty()) {
-//                    System.out.println("YEEEEES");
-//
-//                }
-//            }
-//            for (String t : test1) {
-//                //System.out.println(t);
-//                String[] tt = t.split("=");
-//                if (tt.length >= 2) {
-//                    for (int i = 1; i < tt.length; i++) {
-//                        System.out.println(tt[i].trim());
-//                        if (tt[i].substring(1, tt[i].length() - 1).isEmpty()) {
-//                            System.out.println("YEEEEES");
-//
-//                        }
-//                    }
-//                }
-//
-//            }
-
-                // System.out.println(filetoStringArray[1]);
-//            System.out.println(filetoStringArray[4]);
-//            while (scan.hasNextLine()){
-//                System.out.println(scan.nextLine());
-//            }
-                // System.out.println(fileToString);
-
-
-                // int counter = 0;
-                int articleNumber = 0;
-
-                //String line = scan.nextLine();
-//            while (scan.hasNextLine()) {
-//
-//                String line = scan.nextLine();
-//                System.out.println(line);
-//                StringTokenizer str = new StringTokenizer(scan, "$");
-//
-//                if (!line.isEmpty()) {
-//                    //int articleNumber = scan.nextInt();
-//                    String[] line1 = line.split("=");
-//
-////                    if (scan.nextLine().endsWith()("")) {
-////                        articleNumber = scan.nextInt();
-////                        continue;
-////
-////                    }
-//                    if (line1[1].length() <= 3)
-//                        throw new FileInvalidException();
-//
-//                    else if (line1[0].equals("author")) {
-//                        counter++;
-//                        System.out.println(line1[1].length());
-//                    }
-//
-//                }
-//
-//
-//            }
-                //System.out.println(counter);
-
-            } catch (FileInvalidException e) {
-                System.out.println(e.getMessage() + "file " + t);
-                System.out.println("error location " + error);
-                records = new String[0];
-            }
-
-
-        }
     }
 
 
@@ -188,8 +39,128 @@ public class Main {
 
     public static void processFilesForValidation(Scanner[] scanArray) {
 
+        //for (int t = 0; t < scanArray.length; t++) {
+        String error = "";
+        String author = "";
+        String journal = "";
+        String year = "";
+        String title = "";
+        String volume = "";
+        String pages = "";
+        String number = "";
+        String doi = "";
+        String month = "";
+        String[] acmRecords;
+        String[] ieeeRecords;
+        String[] njRecords;
+
+
+        try {
+            Scanner scan = new Scanner(new FileInputStream("Latex1.bib"));
+            String fileToString = fileToString(scan);
+            String[] fileToStringArray = fileToString.trim().split("@ARTICLE");
+
+            acmRecords = new String[fileToStringArray.length-1];
+            ieeeRecords = new String[fileToStringArray.length-1];
+            njRecords = new String[fileToStringArray.length-1];
+
+            int counter = 0;
+            for (int j = 1; j < fileToStringArray.length; j++) {
+
+                String[] singleArticle = fileToStringArray[j].split(",");
+                for (int i = 0; i < singleArticle.length; i++) {
+                    String[] info = singleArticle[i].split("=");
+                    if (info.length >= 2) {
+                        String filed = info[0].trim();
+                        if (info[1].trim().substring(1, info[1].length() - 1).isEmpty()) {
+                            error = info[0].trim();
+                            throw new FileInvalidException();
+                        }
+                        switch (filed) {
+                            case "author":
+                                author = info[1].substring(1, info[1].length() - 1).trim();
+                                break;
+                            case "journal":
+                                journal = info[1].substring(1, info[1].length() - 1).trim();
+                                break;
+                            case "volume":
+                                volume = info[1].substring(1, info[1].length() - 1).trim();
+                                break;
+                            case "year":
+                                year = info[1].substring(1, info[1].length() - 1).trim();
+                                break;
+                            case "number":
+                                number = info[1].substring(1, info[1].length() - 1).trim();
+                                break;
+                            case "title":
+                                title = info[1].substring(1, info[1].length() - 1).trim();
+                                break;
+                            case "pages":
+                                pages = info[1].substring(1, info[1].length() - 1).trim();
+                                break;
+                            case "doi":
+                                doi = info[1].substring(1, info[1].length() - 1).trim();
+                                break;
+                            case "month":
+                                month = info[1].substring(1, info[1].length() - 1).trim();
+                                break;
+
+
+                        }
+
+                    }
+                }
+
+                String ieee = ieeeFormat(author, title, journal, volume, number, pages, month, year);
+                ieeeRecords[counter] = ieee;
+                //System.out.println("IEEE: " + ieee);
+                //System.out.println();
+                String acm = acmFormat(counter + 1, author, title, journal, volume, number, year, pages, doi);
+                acmRecords[counter] = acm;
+                // System.out.println("ACM: " + acm);
+                //System.out.println();
+                String nj = njFormat(author, title, journal, volume, pages, year);
+                njRecords[counter] = nj;
+                //System.out.println("NJ: " + nj);
+                //System.out.println();
+
+               // System.out.println("----Ended one article---");
+
+
+                counter++;
+
+            }
+            System.out.println("IEEE:");
+            for (String i : ieeeRecords) {
+                System.out.println(i);
+            }
+            System.out.println("ACM");
+            for (String a : acmRecords) {
+                System.out.println(a);
+            }
+            System.out.println("NJ:");
+            for (String n : njRecords) {
+                System.out.println(n);
+            }
+
+            //System.out.println("ended file " + (t + 1));
+            System.out.println();
+
+
+        } catch (FileInvalidException e) {
+            // System.out.println(e.getMessage() + "file " + t);
+            System.out.println("error location " + error);
+            ieeeRecords = new String[0];
+            njRecords = new String[0];
+            acmRecords = new String[0];
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+
 
     }
+    //}
+
 
     private static void closeAllScanner(int scanCounter, Scanner[] scanArray) {
         for (int i = 0; i < scanCounter; i++) {
@@ -242,7 +213,7 @@ public class Main {
         }
     }
 
-    public static String fileToString(Scanner scan) {
+    private static String fileToString(Scanner scan) {
         String fileAsString = "";
         while (scan.hasNextLine()) {
             String tempLine = scan.nextLine();
@@ -254,4 +225,28 @@ public class Main {
         scan.close();
         return fileAsString;
     }
+
+    private static String ieeeFormat(String author, String title, String journal, String volume, String number, String pages, String month, String year) {
+
+        author = author.replace(" and", ",");
+
+        return author + "." + " \"" + title + "\", " + journal + ", vol. " + volume + ", no. " + number + ", p. " + pages + ", " + month + " " + year + ".\n";
+    }
+
+    private static String acmFormat(int counter, String author, String title, String journal, String volume, String number, String year, String pages, String doi) {
+        author = author.split("and")[0] + "et al.";
+
+        return "[" + counter + "] " + author + " " + year + ". " + title + ". " + journal + ". " + volume + ", " + number + " (" + year + "), " + pages + ". DOI:https://doi.org/" + doi + ".\n";
+
+    }
+
+    private static String njFormat(String author, String title, String journal, String volume, String pages, String year) {
+
+        author = author.replace("and", "&");
+
+        return author + ". " + title + ". " + journal + ". " + volume + ", " + pages + "(" + year + ").\n";
+
+    }
+
+
 }
