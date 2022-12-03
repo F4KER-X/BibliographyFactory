@@ -69,14 +69,19 @@ public class Main {
         }
     }
 
-    private static void deleteFile(String filesName) {
+    //delete file
+    private static void deleteFile(String fileName) {
 
-        File f = new File(filesName);
+        //create a file object
+        File f = new File(fileName);
+        //delete the file.
+        //this could return a false value if the file is still being used (stream in open)
         f.delete();
 
     }
 
 
+    //validate files.
     public static void processFilesForValidation(Scanner[] scanArray, PrintWriter[][] pw, String[]
             OUTPUT_FILE_NAME, String ext, String inputName, String inputEXT) {
         String error = "";
@@ -185,14 +190,17 @@ public class Main {
 
     }
 
-    //no changes
+    //closing all scanner streams.
+    //takes in a scanner array
+    //throws NullPointerException when looping over the entire array if not all scanner were added.
     private static void closeAllScanner(Scanner[] scanArray) throws NullPointerException {
         for (Scanner sc : scanArray) {
             sc.close();
         }
     }
 
-    //no changes
+    //closing all PrintWriter streams
+    //takes in a 2d array
     private static void closeAllPrintWriter(PrintWriter[][] pwArray) throws NullPointerException {
         for (PrintWriter[] printWriters : pwArray) {
             for (PrintWriter printWriter : printWriters) {
