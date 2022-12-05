@@ -11,16 +11,14 @@ public class Main {
         final String OUTPUT_EXT = ".json";
         final String INPUT_FILE_NAME = "Latex";
         final String[] OUTPUT_FILE_NAME = {"IEEE", "ACM", "NJ"};
-        Scanner[] scanArray = new Scanner[NUMBER_OF_FILES];
-        PrintWriter[][] pwArray = {new PrintWriter[NUMBER_OF_FILES], new PrintWriter[NUMBER_OF_FILES], new PrintWriter[NUMBER_OF_FILES],};
 
 
         //open files
-        readFiles(scanArray, NUMBER_OF_FILES, INPUT_FILE_NAME, INPUT_EXT);
+        Scanner[] scArray = readFiles(NUMBER_OF_FILES, INPUT_FILE_NAME, INPUT_EXT);
         //create files
-        createFiles(pwArray, NUMBER_OF_FILES, OUTPUT_FILE_NAME, OUTPUT_EXT, scanArray);
+        PrintWriter[][] pwArray = createFiles(NUMBER_OF_FILES, OUTPUT_FILE_NAME, OUTPUT_EXT, scArray);
         //process files
-        processFilesForValidation(scanArray, pwArray, OUTPUT_FILE_NAME, OUTPUT_EXT, INPUT_FILE_NAME, INPUT_EXT);
+        processFilesForValidation(scArray, pwArray, OUTPUT_FILE_NAME, OUTPUT_EXT, INPUT_FILE_NAME, INPUT_EXT);
         //user input
         userProcessing(scan);
 
@@ -30,14 +28,22 @@ public class Main {
     }
 
 
+    /**
+     * Takes user input to return the info from files.
+     *
+     * @param scan User Input.
+     */
     public static void userProcessing(Scanner scan) {
         System.out.print("Please enter the name of the files that you need to review: ");
         String fileName = scan.nextLine();
         BufferedReader br = null;
 
         try {
+            //initialize BufferReader object.
             br = new BufferedReader(new FileReader(fileName));
+            //read first line
             String x = br.readLine();
+            //check not at the end of the file.
             while (x != null) {
                 System.out.println(x);
                 x = br.readLine();
@@ -81,7 +87,16 @@ public class Main {
     }
 
 
-    //validate files.
+    /**
+     * Transfer and writes info into the right files.
+     *
+     * @param scanArray        Array of File to read
+     * @param pw               Array of created files
+     * @param OUTPUT_FILE_NAME Array of list of output files
+     * @param ext              Output Extension
+     * @param inputName        Input file name
+     * @param inputEXT         Input Extension
+     */
     public static void processFilesForValidation(Scanner[] scanArray, PrintWriter[][] pw, String[]
             OUTPUT_FILE_NAME, String ext, String inputName, String inputEXT) {
         String error = "";
@@ -143,21 +158,11 @@ public class Main {
 
                         }
                     }
-
-
-                    String ieee = ieeeFormat(author, title, journal, volume, number, pages, month, year);
-                    ieeeRecords[counter] = ieee;
-
-                    String acm = acmFormat(counter + 1, author, title, journal, volume, number, year, pages, doi);
-                    acmRecords[counter] = acm;
-
-                    String nj = njFormat(author, title, journal, volume, pages, year);
-                    njRecords[counter] = nj;
-
+                    ieeeRecords[counter] = ieeeFormat(author, title, journal, volume, number, pages, month, year);
+                    acmRecords[counter] = acmFormat(counter + 1, author, title, journal, volume, number, year, pages, doi);
+                    njRecords[counter] = njFormat(author, title, journal, volume, pages, year);
 
                     counter++;
-
-
                 }
 
                 writeToFile(pw[0][k], ieeeRecords);
@@ -171,7 +176,6 @@ public class Main {
 
 
             } catch (FileInvalidException e) {
-
                 System.out.println(e.getMessage());
 
                 for (PrintWriter[] p : pw) {
@@ -209,10 +213,17 @@ public class Main {
         }
     }
 
-
-    //no changes
-    public static void readFiles(Scanner[] scanArray, int NUMBER_OF_FILES, String inputFileName, String inputEXT) {
+    /**
+     * Read the provided files.
+     *
+     * @param NUMBER_OF_FILES Number of files to read.
+     * @param inputFileName   Input file name.
+     * @param inputEXT        Input Extension.
+     * @return Array of Scanner Object.
+     */
+    public static Scanner[] readFiles(int NUMBER_OF_FILES, String inputFileName, String inputEXT) {
         //loop over the number of files we are trying to open (10 in our case)
+        Scanner[] scanArray = new Scanner[NUMBER_OF_FILES];
         for (int i = 1; i <= NUMBER_OF_FILES; i++) {
             String fileName = inputFileName + i + inputEXT;
             try {
@@ -229,19 +240,39 @@ public class Main {
                 }
             }
         }
+        return scanArray;
 
     }
 
-    public static void createFiles(PrintWriter[][] pwArray, int numberOfFiles, String[] outputName, String
+    /**
+     * Create files.
+     *
+     * @param numberOfFiles Number of read files
+     * @param outputName    Array of output files
+     * @param outputEXT     Output Extension.
+     * @param scanArray     Array of open files to read from.
+     * @return 2D array of PrintWriter objects.
+     */
+    public static PrintWriter[][] createFiles(int numberOfFiles, String[] outputName, String
             outputEXT, Scanner[] scanArray) {
+        //create the array
+        PrintWriter[][] pwArray = new PrintWriter[outputName.length][];
+        for (int i = 0; i < outputName.length; i++) {
+            pwArray[i] = new PrintWriter[numberOfFiles];
+        }
+
         String fileName = "";
+        //to save created files name in order to delete
         String[] createdFilesNames = new String[numberOfFiles * outputName.length];
         int counter = 0;
         try {
+            //loop to create the files.
             for (int j = 0; j < pwArray.length; j++) {
                 for (int i = 1; i <= numberOfFiles; i++) {
                     fileName = outputName[j] + i + outputEXT;
+                    //add PrintWriter object to the array
                     pwArray[j][i - 1] = new PrintWriter(new FileOutputStream(fileName));
+                    //add the name of the list.
                     createdFilesNames[counter] = fileName;
                     counter++;
 
@@ -250,6 +281,7 @@ public class Main {
         } catch (FileNotFoundException e) {
             System.out.println("Could not creat output file " + fileName + "\nPlease check for problems! Program will terminate after closing all files and deleting previous ones.");
             try {
+                //close all PrintWriters
                 closeAllPrintWriter(pwArray);
 
             } catch (NullPointerException j) {
@@ -271,10 +303,9 @@ public class Main {
 
             }
         }
-
+        return pwArray;
     }
 
-    //no changes
     private static String fileToString(Scanner scan) {
         String fileAsString = "";
         while (scan.hasNextLine()) {
@@ -288,14 +319,12 @@ public class Main {
         return fileAsString;
     }
 
-    //no changes
     private static String ieeeFormat(String author, String title, String journal, String volume, String
             number, String pages, String month, String year) {
         author = author.replace(" and", ",");
         return author + "." + " \"" + title + "\", " + journal + ", vol. " + volume + ", no. " + number + ", p. " + pages + ", " + month + " " + year + ".\n";
     }
 
-    //no changes
     private static String acmFormat(int counter, String author, String title, String journal, String
             volume, String number, String year, String pages, String doi) {
         author = author.split("and")[0] + "et al.";
@@ -304,7 +333,6 @@ public class Main {
     }
 
 
-    //no changes
     private static String njFormat(String author, String title, String journal, String volume, String pages, String
             year) {
         author = author.replace("and", "&");
