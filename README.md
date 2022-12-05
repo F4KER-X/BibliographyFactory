@@ -1,4 +1,4 @@
-# BibliographyFactory
+# Bibliography Factory
 
 This project accepts .bib files and transfer their information into IEEE, ACM and NJ format.
 
